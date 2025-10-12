@@ -1,0 +1,69 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Australia: GDP per capita (US$) vs Life expectancy (years) at decade intervals.",
+  "width": 900,
+  "height": 420,
+  "data": {
+    "url": "data/API_NY.GDP.PCAP.CD_DS2_en_csv_v2_1233921.csv",
+    "format": {"type": "csv"}
+  },
+  "transform": [
+    {"filter": "datum['Country Code'] == 'AUS'"},
+    {
+      "fold": ["1960","1970","1980","1990","2000","2010","2020"],
+      "as": ["year","gdp_pc"]
+    },
+    {"calculate": "toNumber(datum.gdp_pc)", "as": "gdp_pc_num"},
+    {"calculate": "toNumber(datum.year)", "as": "yearNum"},
+    {
+      "lookup": "Country Code",
+      "from": {
+        "data": {"url": "data/API_SP.DYN.LE00.IN_DS2_en_csv_v2_22997.csv", "format": {"type": "csv"}},
+        "key": "Country Code",
+        "fields": ["Indicator Code","1960","1970","1980","1990","2000","2010","2020"]
+      },
+      "as": ["le_indicator","le_1960","le_1970","le_1980","le_1990","le_2000","le_2010","le_2020"]
+    },
+    {"filter": "datum.le_indicator == 'SP.DYN.LE00.IN'"},
+    {"calculate": "toNumber(datum['le_' + datum.year])", "as": "life_exp_num"},
+    {"filter": "isFinite(datum.gdp_pc_num) && isFinite(datum.life_exp_num)"}
+  ],
+  "layer": [
+    {
+      "mark": {"type": "line", "point": {"filled": true}},
+      "encoding": {
+        "x": {"field": "yearNum", "type": "quantitative", "title": "Year", "axis": {"format": "d"}},
+        "y": {
+          "field": "gdp_pc_num",
+          "type": "quantitative",
+          "title": "GDP per capita (current US$)",
+          "axis": {"grid": true}
+        },
+        "color": {"value": "#1f77b4"},
+        "tooltip": [
+          {"field": "yearNum", "type": "quantitative", "title": "Year", "format": "d"},
+          {"field": "gdp_pc_num", "type": "quantitative", "title": "GDP per capita (US$)", "format": ",.0f"},
+          {"field": "life_exp_num", "type": "quantitative", "title": "Life expectancy (yrs)", "format": ".1f"}
+        ]
+      }
+    },
+    {
+      "mark": {"type": "line", "point": {"filled": true}},
+      "encoding": {
+        "x": {"field": "yearNum", "type": "quantitative", "title": "Year", "axis": {"format": "d"}},
+        "y": {
+          "field": "life_exp_num",
+          "type": "quantitative",
+          "title": "Life expectancy (years)",
+          "axis": {"orient": "right"}
+        },
+        "color": {"value": "#ff7f0e"}
+      }
+    }
+  ],
+  "resolve": {"scale": {"y": "independent"}},
+  "config": {
+    "view": {"stroke": "#444", "strokeWidth": 1.2},
+    "axis": {"labelFontSize": 12, "titleFontSize": 12}
+  }
+}
