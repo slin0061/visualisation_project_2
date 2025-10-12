@@ -1,1 +1,96 @@
-<!-- This is the webpage for DV2 -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wealth vs Health in Asia–Pacific</title>
+  <meta name="description" content="GDP per capita and life expectancy across Asia–Pacific using Vega-Lite visualisations." />
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Vega libraries (pin to stable versions for grading reproducibility) -->
+  <script src="https://cdn.jsdelivr.net/npm/vega@5.25.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.20.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.26.0"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1>Wealth vs Health in Asia–Pacific</h1>
+      <p class="deck">
+        How strongly does income relate to longevity across our region? Explore the big picture, the relationship,
+        and a closer look at six countries.
+      </p>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero map -->
+    <section class="card" aria-labelledby="map-title">
+      <h2 id="map-title">GDP per capita across Asia–Pacific</h2>
+      <p class="subtle">Select year in the control below the map (legend at bottom). Hover for details.</p>
+      <div id="viz-map" class="viz"></div>
+      <figcaption class="caption">
+        Source: World Bank, GDP per capita (current US$). Projection: Mercator. Graticules every 30°.
+      </figcaption>
+    </section>
+
+    <!-- Scatter -->
+    <section class="card" aria-labelledby="scatter-title">
+      <h2 id="scatter-title">Wealth vs Health</h2>
+      <p class="subtle">GDP per capita (log scale) vs life expectancy. Bubble size = population.</p>
+      <div id="viz-scatter" class="viz"></div>
+      <figcaption class="caption">
+        Sources: World Bank (GDP per capita, Life expectancy, Population). Year selector in the chart.
+      </figcaption>
+    </section>
+
+    <!-- 6-country grid -->
+    <section class="card" aria-labelledby="grid-title">
+      <h2 id="grid-title">Six-country spotlight (decadal trend)</h2>
+      <p class="subtle">GDP per capita (left axis) and life expectancy (right axis). Decadal points from 1960–2020.</p>
+      <div id="viz-grid" class="viz"></div>
+      <figcaption class="caption">
+        Countries: Australia, China, Japan, New Zealand, India, Malaysia.
+      </figcaption>
+    </section>
+
+    <!-- About / methods -->
+    <section class="meta card">
+      <h3>About this page</h3>
+      <ul class="meta-list">
+        <li>Author: <span class="mono">Sam Lindsay</span></li>
+        <li>Data sources: World Bank Open Data (WDI) — indicator codes
+          <span class="mono">NY.GDP.PCAP.CD</span>,
+          <span class="mono">SP.DYN.LE00.IN</span>,
+          <span class="mono">SP.POP.TOTL</span>.
+        </li>
+        <li>Tools: Vega-Lite v5, Vega-Embed.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Made for FIT3179 — Data Visualisation 2</p>
+    </div>
+  </footer>
+
+  <script>
+    // Helper to embed a spec file into a target element
+    function renderSpec(target, specPath, opts = {}) {
+      const defaults = {
+        actions: false,
+        renderer: 'canvas',
+        // Ensures charts scale nicely inside responsive containers
+        config: { autosize: { type: 'fit', contains: 'padding' } }
+      };
+      return vegaEmbed(target, specPath, Object.assign({}, defaults, opts));
+    }
+
+    // Render all three charts; paths assume files live beside this HTML file.
+    renderSpec('#viz-map', 'GDP_APAC_Map.vg.json');
+    renderSpec('#viz-scatter', 'GDP_vs_LE_scatter.vg.json');
+    renderSpec('#viz-grid', 'GDP_and_LE_grid.vg.json');
+  </script>
+</body>
+</html>
