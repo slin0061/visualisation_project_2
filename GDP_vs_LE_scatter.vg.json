@@ -1,7 +1,12 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "APAC: GDP per capita vs Life expectancy",
+    "subtitle": "X-axis is log scale"
+  },
   "description": "APAC: GDP per capita vs Life expectancy, bubble size = population. Year selectable.",
-  "width": 800,
+  "width": "container",
+  "autosize": {"type": "fit", "contains": "padding"},
   "height": 520,
   "data": {
     "url": "data/API_NY.GDP.PCAP.CD_DS2_en_csv_v2_1233921.csv",
@@ -19,14 +24,9 @@
     }
   ],
   "transform": [
-    {
-      "filter": "indexof(['AUS','NZL','SGP','MYS','IDN','VNM','PHL','THA','JPN','KOR','CHN','PNG','FJI','LKA','BGD','KHM','LAO','MMR','BRN','TLS','MNG','NPL','IND','PAK'], datum['Country Code']) >= 0"
-    },
-    {
-      "calculate": "isValid(datum[toString(yearParam)]) ? toNumber(datum[toString(yearParam)]) : null",
-      "as": "gdp_pc"
-    },
-    { "filter": "isFinite(datum.gdp_pc) && datum.gdp_pc > 0" },
+    {"filter": "indexof(['AUS','NZL','SGP','MYS','IDN','VNM','PHL','THA','JPN','KOR','CHN','PNG','FJI','LKA','BGD','KHM','LAO','MMR','BRN','TLS','MNG','NPL','IND','PAK'], datum['Country Code']) >= 0"},
+    {"calculate": "isValid(datum[toString(yearParam)]) ? toNumber(datum[toString(yearParam)]) : null", "as": "gdp_pc"},
+    {"filter": "isFinite(datum.gdp_pc) && datum.gdp_pc > 0"},
     {
       "lookup": "Country Code",
       "from": {
@@ -36,7 +36,7 @@
       },
       "as": ["le_indicator","le_2001","le_2002","le_2003","le_2004","le_2005","le_2006","le_2007","le_2008","le_2009","le_2010","le_2011","le_2012","le_2013","le_2014","le_2015","le_2016","le_2017","le_2018","le_2019","le_2020","le_2021","le_2022","le_2023"]
     },
-    { "filter": "datum.le_indicator == 'SP.DYN.LE00.IN'" },
+    {"filter": "datum.le_indicator == 'SP.DYN.LE00.IN'"},
     {
       "lookup": "Country Code",
       "from": {
@@ -46,23 +46,42 @@
       },
       "as": ["pop_indicator","pop_2001","pop_2002","pop_2003","pop_2004","pop_2005","pop_2006","pop_2007","pop_2008","pop_2009","pop_2010","pop_2011","pop_2012","pop_2013","pop_2014","pop_2015","pop_2016","pop_2017","pop_2018","pop_2019","pop_2020","pop_2021","pop_2022","pop_2023"]
     },
-    { "filter": "datum.pop_indicator == 'SP.POP.TOTL'" },
-    { "calculate": "toNumber(datum['le_' + toString(yearParam)])", "as": "life_exp" },
-    { "calculate": "toNumber(datum['pop_' + toString(yearParam)])", "as": "population" },
-    { "filter": "isFinite(datum.life_exp) && isFinite(datum.population)" },
-    {
-      "calculate": "isValid(datum['Country Name']) ? datum['Country Name'] : datum['Country Code']",
-      "as": "country"
-    }
+    {"filter": "datum.pop_indicator == 'SP.POP.TOTL'"},
+    {"calculate": "toNumber(datum['le_' + toString(yearParam)])", "as": "life_exp"},
+    {"calculate": "toNumber(datum['pop_' + toString(yearParam)])", "as": "population"},
+    {"filter": "isFinite(datum.life_exp) && isFinite(datum.population)"},
+    {"calculate": "isValid(datum['Country Name']) ? datum['Country Name'] : datum['Country Code']", "as": "country"}
   ],
   "layer": [
     {
+      "transform": [{"calculate": "'Countries'", "as": "series"}],
       "mark": {"type": "point", "filled": true, "opacity": 0.9},
       "encoding": {
-        "x": {"field": "gdp_pc", "type": "quantitative", "scale": {"type": "log"}, "title": "GDP per capita (current US$)"},
-        "y": {"field": "life_exp", "type": "quantitative", "scale": {"type": "log", "domain": [50, 100], "nice": false}, "title": "Life expectancy (years)"},
-        "size": {"field": "population", "type": "quantitative", "scale": {"type": "sqrt", "range": [40, 600]}, "legend": {"title": "Population"}},
-        "color": {"value": "#7aa6d9"},
+        "x": {
+          "field": "gdp_pc",
+          "type": "quantitative",
+          "scale": {"type": "log"},
+          "title": "GDP per capita (current US$, log scale)",
+          "axis": {"labelOverlap": "greedy", "tickCount": 6, "labelSeparation": 6}
+        },
+        "y": {
+          "field": "life_exp",
+          "type": "quantitative",
+          "scale": {"type": "log", "domain": [50, 100], "nice": false},
+          "title": "Life expectancy (years)"
+        },
+        "size": {
+          "field": "population",
+          "type": "quantitative",
+          "scale": {"type": "sqrt", "range": [40, 600]},
+          "legend": {"title": "Population"}
+        },
+        "color": {
+          "field": "series",
+          "type": "nominal",
+          "scale": {"domain": ["Countries","Trend"], "range": ["#7aa6d9","#0b3a6e"]},
+          "legend": {"orient": "top-right", "title": ""}
+        },
         "tooltip": [
           {"field": "country", "title": "Country"},
           {"field": "gdp_pc", "type": "quantitative", "title": "GDP pc (US$)", "format": ",.0f"},
@@ -73,8 +92,25 @@
       }
     },
     {
-      "mark": {"type": "text", "dy": -15, "font": "Inter", "fontSize": 13, "stroke": "black", "strokeWidth": 1},
-      "transform": [{"filter": "indexof(['AUS','JPN','CHN','NZL','IND'], datum['Country Code']) >= 0"}],
+      "transform": [
+        {"regression": "life_exp", "on": "gdp_pc", "method": "linear", "as": ["gdp_pc","life_exp"]},
+        {"calculate": "'Trend'", "as": "series"}
+      ],
+      "mark": {"type": "line", "strokeDash": [5,3], "size": 2},
+      "encoding": {
+        "x": {"field": "gdp_pc", "type": "quantitative", "scale": {"type": "log"}},
+        "y": {"field": "life_exp", "type": "quantitative", "scale": {"type": "log", "domain": [50, 100], "nice": false}},
+        "color": {
+          "field": "series",
+          "type": "nominal",
+          "scale": {"domain": ["Countries","Trend"], "range": ["#7aa6d9","#0b3a6e"]},
+          "legend": {"orient": "top-right", "title": ""}
+        }
+      }
+    },
+    {
+      "mark": {"type": "text", "dy": 22, "font": "Inter", "fontSize": 12, "stroke": "black", "strokeWidth": 0.3},
+      "transform": [{"filter": "indexof(['AUS','JPN','CHN','NZL','IND','MYS'], datum['Country Code']) >= 0"}],
       "encoding": {
         "x": {"field": "gdp_pc", "type": "quantitative", "scale": {"type": "log"}},
         "y": {"field": "life_exp", "type": "quantitative", "scale": {"type": "log", "domain": [50, 100], "nice": false}},

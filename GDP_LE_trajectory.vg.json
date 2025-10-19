@@ -1,0 +1,126 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Connected scatter: a country's path over time in GDP per capita vs Life expectancy. Background points = APAC at selected year.",
+  "width": "container",
+  "height": 520,
+  "autosize": { "type": "fit", "contains": "padding" },
+  "params": [
+    {
+      "name": "countryParam",
+      "value": "AUS",
+      "bind": {
+        "input": "select",
+        "name": "Country: ",
+        "options": ["AUS","CHN","JPN","NZL","IND","MYS","SGP","IDN","VNM","PHL","THA","KOR","PNG","FJI","LKA","BGD","KHM","LAO","MMR","BRN","TLS","MNG","NPL","PAK"]
+      }
+    },
+    {
+      "name": "yearParam",
+      "value": 2023,
+      "bind": { "input": "range", "name": "Year: ", "min": 1960, "max": 2024, "step": 1 }
+    }
+  ],
+  "layer": [
+    {
+      "data": { "url": "data/API_NY.GDP.PCAP.CD_DS2_en_csv_v2_1233921.csv", "format": { "type": "csv" } },
+      "transform": [
+        {
+          "filter": "indexof(['AUS','NZL','SGP','MYS','IDN','VNM','PHL','THA','JPN','KOR','CHN','PNG','FJI','LKA','BGD','KHM','LAO','MMR','BRN','TLS','MNG','NPL','IND','PAK'], datum['Country Code']) >= 0"
+        },
+        { "calculate": "toNumber(datum[toString(yearParam)])", "as": "gdp_pc" },
+        {
+          "lookup": "Country Code",
+          "from": {
+            "data": { "url": "data/API_SP.DYN.LE00.IN_DS2_en_csv_v2_22997.csv", "format": { "type": "csv" } },
+            "key": "Country Code",
+            "fields": ["1960","1961","1962","1963","1964","1965","1966","1967","1968","1969","1970","1971","1972","1973","1974","1975","1976","1977","1978","1979","1980","1981","1982","1983","1984","1985","1986","1987","1988","1989","1990","1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024"]
+          }
+        },
+        { "calculate": "toNumber(datum[toString(yearParam)])", "as": "life_exp" },
+        { "filter": "isFinite(datum.gdp_pc) && isFinite(datum.life_exp) && datum.gdp_pc > 0" }
+      ],
+      "mark": { "type": "point", "filled": true, "opacity": 0.35 },
+      "encoding": {
+        "x": { "field": "gdp_pc", "type": "quantitative", "scale": { "type": "log" }, "title": "GDP per capita (current US$) — log scale" },
+        "y": { "field": "life_exp", "type": "quantitative", "scale": { "type": "log", "domain": [50,100], "nice": false }, "title": "Life expectancy (years)" },
+        "color": { "value": "#9aaec9" },
+        "tooltip": [
+          { "field": "Country Name", "title": "Country" },
+          { "field": "Country Code", "title": "ISO3" },
+          { "field": "gdp_pc", "type": "quantitative", "title": "GDP pc (US$)", "format": ",.0f" },
+          { "field": "life_exp", "type": "quantitative", "title": "Life exp (yrs)", "format": ".1f" },
+          { "field": "yearParam", "title": "Year" }
+        ]
+      }
+    },
+    {
+      "data": { "url": "data/API_NY.GDP.PCAP.CD_DS2_en_csv_v2_1233921.csv", "format": { "type": "csv" } },
+      "transform": [
+        { "filter": "datum['Country Code'] == countryParam" },
+        {
+          "fold": ["1960","1961","1962","1963","1964","1965","1966","1967","1968","1969","1970","1971","1972","1973","1974","1975","1976","1977","1978","1979","1980","1981","1982","1983","1984","1985","1986","1987","1988","1989","1990","1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024"],
+          "as": ["year","gdp_pc_str"]
+        },
+        { "calculate": "toNumber(datum.gdp_pc_str)", "as": "gdp_pc" },
+        {
+          "lookup": "Country Code",
+          "from": {
+            "data": { "url": "data/API_SP.DYN.LE00.IN_DS2_en_csv_v2_22997.csv", "format": { "type": "csv" } },
+            "key": "Country Code",
+            "fields": ["1960","1961","1962","1963","1964","1965","1966","1967","1968","1969","1970","1971","1972","1973","1974","1975","1976","1977","1978","1979","1980","1981","1982","1983","1984","1985","1986","1987","1988","1989","1990","1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024"]
+          },
+          "as": ["le_1960","le_1961","le_1962","le_1963","le_1964","le_1965","le_1966","le_1967","le_1968","le_1969","le_1970","le_1971","le_1972","le_1973","le_1974","le_1975","le_1976","le_1977","le_1978","le_1979","le_1980","le_1981","le_1982","le_1983","le_1984","le_1985","le_1986","le_1987","le_1988","le_1989","le_1990","le_1991","le_1992","le_1993","le_1994","le_1995","le_1996","le_1997","le_1998","le_1999","le_2000","le_2001","le_2002","le_2003","le_2004","le_2005","le_2006","le_2007","le_2008","le_2009","le_2010","le_2011","le_2012","le_2013","le_2014","le_2015","le_2016","le_2017","le_2018","le_2019","le_2020","le_2021","le_2022","le_2023","le_2024"]
+        },
+        { "calculate": "toNumber(datum['le_'+datum.year])", "as": "life_exp" },
+        { "calculate": "toNumber(datum.year)", "as": "year_num" },
+        { "filter": "isFinite(datum.gdp_pc) && isFinite(datum.life_exp) && datum.gdp_pc > 0" },
+        { "filter": "datum.year_num <= yearParam" }
+      ],
+      "layer": [
+        {
+          "mark": { "type": "line", "interpolate": "monotone", "strokeWidth": 2 },
+          "encoding": {
+            "x": { "field": "gdp_pc", "type": "quantitative", "scale": { "type": "log" } },
+            "y": { "field": "life_exp", "type": "quantitative", "scale": { "type": "log", "domain": [50,100], "nice": false } },
+            "color": { "field": "year_num", "type": "quantitative", "scale": { "scheme": "blues" }, "legend": { "title": "Year" } },
+            "tooltip": [
+              { "field": "Country Name", "title": "Country" },
+              { "field": "year_num", "title": "Year" },
+              { "field": "gdp_pc", "type": "quantitative", "title": "GDP pc (US$)", "format": ",.0f" },
+              { "field": "life_exp", "type": "quantitative", "title": "Life exp (yrs)", "format": ".1f" }
+            ]
+          }
+        },
+        {
+          "mark": { "type": "point", "filled": true, "size": 80 },
+          "encoding": {
+            "x": { "field": "gdp_pc", "type": "quantitative", "scale": { "type": "log" } },
+            "y": { "field": "life_exp", "type": "quantitative", "scale": { "type": "log", "domain": [50,100], "nice": false } },
+            "color": { "field": "year_num", "type": "quantitative", "scale": { "scheme": "blues" }, "legend": null }
+          }
+        },
+        {
+          "transform": [
+            { "window": [ { "op": "row_number", "as": "rn" } ], "sort": [ { "field": "year_num", "order": "ascending" } ] },
+            { "filter": "datum.rn==1 || datum.year_num == yearParam" }
+          ],
+          "mark": { "type": "text", "dy": -10, "font": "Inter", "fontSize": 12, "fontWeight": "bold", "stroke": "white", "strokeWidth": 2 },
+          "encoding": {
+            "x": { "field": "gdp_pc", "type": "quantitative", "scale": { "type": "log" } },
+            "y": { "field": "life_exp", "type": "quantitative", "scale": { "type": "log", "domain": [50,100], "nice": false } },
+            "text": {
+              "field": "year_num",
+              "type": "quantitative"
+            },
+            "color": { "value": "#1b2430" }
+          }
+        }
+      ]
+    }
+  ],
+  "config": {
+    "view": { "stroke": "#444", "strokeWidth": 1.2 },
+    "legend": { "orient": "bottom", "direction": "horizontal" },
+    "axis": { "labelFontSize": 12, "titleFontSize": 12 }
+  }
+}

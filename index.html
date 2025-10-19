@@ -13,6 +13,8 @@
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.26.0"></script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
   <header class="site-header">
     <div class="container">
       <h1>Wealth vs Health in Asia–Pacific</h1>
@@ -23,39 +25,50 @@
     </div>
   </header>
 
-  <main class="container">
-    <!-- Hero map -->
-    <section class="card" aria-labelledby="map-title">
+  <nav class="navbar" aria-label="Primary">
+    <div class="container nav-inner">
+      <div class="nav-left">
+        <span class="nav-logo" aria-hidden="true">▲</span>
+        <span class="nav-title">APAC Wealth vs Health</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#map">Map</a></li>
+        <li><a href="#scatter">Scatter</a></li>
+        <li><a href="#grid">Six-country grid</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main id="main" class="container">
+    <section id="map" class="card" aria-labelledby="map-title">
       <h2 id="map-title">GDP per capita across Asia–Pacific</h2>
-      <p class="subtle">Select year in the control below the map (legend at bottom). Hover for details.</p>
+      <p class="subtle">Across the Asia–Pacific region, wealth is distributed unevenly — from the advanced economies of Japan, Australia, and Singapore to the emerging markets of South and Southeast Asia. The map highlights this vast economic range, showing how some nations have surged ahead while others continue to develop at a steadier pace. This disparity sets the stage for understanding how prosperity shapes broader aspects of wellbeing. Select year in the control below the map (legend at bottom). Hover for details.</p>
       <div id="viz-map" class="viz"></div>
       <figcaption class="caption">
-        Source: World Bank, GDP per capita (current US$). Projection: Mercator. Graticules every 30°.
+        Source: IMF, GDP per capita (current US$). Projection: Mercator.
       </figcaption>
     </section>
 
-    <!-- Scatter -->
-    <section class="card" aria-labelledby="scatter-title">
+    <section id="scatter" class="card" aria-labelledby="scatter-title">
       <h2 id="scatter-title">Wealth vs Health</h2>
-      <p class="subtle">GDP per capita (log scale) vs life expectancy. Bubble size = population.</p>
+      <p class="subtle">When comparing GDP per capita with life expectancy, a clear upward trend emerges: countries with higher incomes tend to enjoy longer lives. Economic strength often enables better healthcare, nutrition, and infrastructure, leading to improved living standards. Yet even among countries at similar wealth levels, noticeable differences appear — suggesting that policy choices, healthcare systems, and social factors also play vital roles. GDP per capita (log scale) vs life expectancy. Bubble size = population.</p>
       <div id="viz-scatter" class="viz"></div>
       <figcaption class="caption">
-        Sources: World Bank (GDP per capita, Life expectancy, Population). Year selector in the chart.
+        Sources: IMF, World Bank (GDP per capita, Life expectancy, Population). Year selector in the chart.
       </figcaption>
     </section>
 
-    <!-- 6-country grid -->
-    <section class="card" aria-labelledby="grid-title">
+    <section id="grid" class="card" aria-labelledby="grid-title">
       <h2 id="grid-title">Six-country spotlight (decadal trend)</h2>
-      <p class="subtle">GDP per capita (left axis) and life expectancy (right axis). Decadal points from 1960–2020.</p>
+      <p class="subtle">Looking at six representative nations over time reveals how growth in income has generally been accompanied by longer lifespans. However, the rate of improvement differs. Japan’s life expectancy rose even after its economic growth slowed, while India and Malaysia continue to gain both wealth and years of life. The pattern confirms a strong correlation between money and longevity — but it also reminds us that true wellbeing depends on how nations invest their prosperity, not just how much they have. GDP per capita (left axis) and life expectancy (right axis). Decadal points from 1960–2020.</p>
       <div id="viz-grid" class="viz"></div>
       <figcaption class="caption">
         Countries: Australia, China, Japan, New Zealand, India, Malaysia.
       </figcaption>
     </section>
 
-    <!-- About / methods -->
-    <section class="meta card">
+    <section id="about" class="meta card">
       <h3>About this page</h3>
       <ul class="meta-list">
         <li>Author: <span class="mono">Sam Lindsay</span></li>
@@ -64,6 +77,7 @@
           <span class="mono">SP.DYN.LE00.IN</span>,
           <span class="mono">SP.POP.TOTL</span>.
         </li>
+        <li>International Monetary Fund (IMF) - https://www.imf.org/external/datamapper/NGDPDPC@WEO/OEMDC/ADVEC/WEOWORLD</li>
         <li>Tools: Vega-Lite v5, Vega-Embed.</li>
       </ul>
     </section>
@@ -76,18 +90,15 @@
   </footer>
 
   <script>
-    // Helper to embed a spec file into a target element
     function renderSpec(target, specPath, opts = {}) {
       const defaults = {
         actions: false,
         renderer: 'canvas',
-        // Ensures charts scale nicely inside responsive containers
         config: { autosize: { type: 'fit', contains: 'padding' } }
       };
       return vegaEmbed(target, specPath, Object.assign({}, defaults, opts));
     }
 
-    // Render all three charts; paths assume files live beside this HTML file.
     renderSpec('#viz-map', 'GDP_APAC_Map.vg.json');
     renderSpec('#viz-scatter', 'GDP_vs_LE_scatter.vg.json');
     renderSpec('#viz-grid', 'GDP_and_LE_grid.vg.json');
